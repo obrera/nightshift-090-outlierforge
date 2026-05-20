@@ -1,51 +1,81 @@
-# nightshift-090-outlierforge
+# OutlierForge 090
 
-React 19 app with Vite, TypeScript, Tailwind CSS v4, wallet-ui, and Solana Kit.
+Live URL: https://outlierforge090.colmena.dev
 
-## Features
+OutlierForge 090 is a dark-mode OPOS-inspired playable character NFT forge for Solana week. Players compose body/class, headgear, armor, weapon, and companion traits, inspect stats, rarity, compatibility rules, and mint readiness, then mint a wallet-signed MPL Core devnet character asset.
 
-- React 19 with Vite 7
-- Solana wallet playground with Wallet Standard support
-- Solana Devnet, Localnet, and Testnet cluster switching
-- Tailwind CSS v4 and `tw-animate-css`
-- TypeScript with strict checking
-- shadcn/ui primitives powered by Base UI and Lucide icons
-- System-aware light and dark theme support with persisted preference
+## Challenge Reference
 
-## Development
+- Build: Nightshift 090
+- Product family: custom NFT trait composition for game characters
+- Primary actor: player/collector composing a playable character
+- Secondary actor: game creator/operator tuning trait rules and mint readiness
+- Why NFT ownership matters: the composed character becomes transferable, provable game identity with first-party generated metadata/artwork and holder-verifiable traits.
+
+## Architecture
+
+- React 19, Vite, TypeScript, Tailwind CSS v4, React Query, wallet-ui, Solana Kit.
+- No `@solana/web3.js`, no wallet-adapter React, and no app/server `Buffer` dependency.
+- `@obrera/mpl-core-kit-lib/generated` supplies `getCreateV1Instruction` for MPL Core CreateV1.
+- Feature code lives under `src/outlierforge` with `data-access`, `feature`, `ui`, and `util` boundaries.
+- The Bun server serves `/health`, `/api/health`, `/api/bootstrap`, `/metadata/<slug>.json`, `/metadata/<slug>.svg`, and the built SPA.
+
+## Wallet-Signed Mint
+
+The live UI uses wallet-ui connection state and wallet-ui signer hooks only when an account exists. The connected wallet is payer, authority, update authority, and owner. The MPL Core asset signer is browser-generated with `@solana/kit` `generateKeyPairSigner`. There is no server mint path.
+
+The proof script mirrors the same shared metadata builder and `getOutlierforgeCreateInstruction` used by the UI, but signs with `/home/obrera/keys/obrE1BHvP4EX8PkxPxAJxYfQkgfgCmXyJadQA3yBb7G.json` as a stand-in wallet for CI/manual proof.
+
+```bash
+bun run proof:mint
+```
+
+Expected output includes:
+
+```text
+asset=<asset address>
+tx=<transaction signature>
+explorer=<devnet explorer asset URL>
+```
+
+## Run Locally
 
 ```bash
 bun install
 bun run dev
 ```
 
-Open `http://localhost:5173` to view the app.
+Open `http://localhost:5173`.
+
+## Production Preview
+
+```bash
+bun run build
+PORT=3000 bun run preview
+```
+
+Open `http://localhost:3000`.
 
 ## Commands
 
 ```bash
-bun run build
-bun run ci
-bun run lint
 bun run lint:fix
-bun run preview
 bun run check-types
+bun run build
+bun run proof:mint
 ```
 
-## Adding Components
+## Deploy
 
-Use the shadcn CLI to scaffold more UI primitives:
+Dokploy can build the included single-container Docker setup:
 
 ```bash
-bunx --bun shadcn@latest add button
+docker compose up --build
 ```
 
-Generated components are written to `src/components/ui`.
+The container uses `oven/bun`, builds the Vite app inside Docker, and serves on `PORT=3000`.
 
-## Usage
+## Agent
 
-Import components from the `@/components` alias:
-
-```tsx
-import { Button } from '@/components/ui/button'
-```
+- Agent/model: OpenAI GPT-5 Codex
+- Reasoning: medium
